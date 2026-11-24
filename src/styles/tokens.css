@@ -1,0 +1,72 @@
+/* =====================================================================
+   CIA EXPERIENCE — IDENTIDADE VISUAL SOLAR CUIDADOS
+   Todas as cores do sistema saem DAQUI. Para aplicar os códigos oficiais
+   da Solar, altere somente os valores abaixo.
+   ===================================================================== */
+:root {
+  /* Institucional — Vinho (principal) */
+  --solar-wine-950: #2b0815;
+  --solar-wine-900: #3f0d20;
+  --solar-wine-800: #5e1530;
+  --solar-wine-700: #7a1e3a;   /* cor institucional principal */
+  --solar-wine-600: #94284a;
+  --solar-wine-100: #f6e3ea;
+
+  /* Secundária — Roxo */
+  --solar-purple-800: #4a2a73;
+  --solar-purple-700: #5b348c;
+  --solar-purple-600: #6b3fa0;  /* cor secundária */
+  --solar-purple-100: #ede6f6;
+
+  /* Destaque — Rosa */
+  --solar-pink-600: #c93a6c;
+  --solar-pink-500: #e0457b;    /* cor de destaque */
+  --solar-pink-300: #f39bbd;
+  --solar-pink-100: #fbe1eb;
+  --solar-pink-50:  #fdf3f7;    /* rosa muito claro (fundos) */
+
+  /* Neutros */
+  --ink-900: #24161d;   /* texto principal */
+  --ink-700: #4a3a42;   /* texto secundário */
+  --ink-500: #75666d;   /* texto auxiliar */
+  --line-300: #e6dbe0;
+  --line-200: #efe7eb;
+  --surface-0: #ffffff;
+  --surface-50: #fbf8f9;
+  --surface-100: #f5eff2;
+
+  /* Estados (reservados — sempre com ícone + texto) */
+  --ok-700: #1d6b46;   --ok-100: #e0f3e9;
+  --warn-700: #8a5a00; --warn-100: #fff1d6;
+  --crit-700: #b4182d; --crit-100: #fde2e5;
+  --info-700: #5b348c; --info-100: #ede6f6;
+
+  /* Tokens semânticos */
+  --color-primary: var(--solar-wine-700);
+  --color-primary-hover: var(--solar-wine-800);
+  --color-secondary: var(--solar-purple-600);
+  --color-accent: var(--solar-pink-500);
+  --color-bg: var(--solar-pink-50);
+  --color-surface: var(--surface-0);
+  --color-text: var(--ink-900);
+  --color-text-muted: var(--ink-500);
+  --color-border: var(--line-300);
+  --focus-ring: 0 0 0 3px rgba(224, 69, 123, 0.35);
+
+  --gradient-brand: linear-gradient(135deg, var(--solar-wine-800) 0%, var(--solar-wine-700) 45%, var(--solar-purple-700) 100%);
+  --gradient-soft: linear-gradient(180deg, #fff 0%, var(--solar-pink-50) 100%);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --shadow-sm: 0 1px 2px rgba(63, 13, 32, 0.06), 0 1px 1px rgba(63, 13, 32, 0.04);
+  --shadow-md: 0 6px 20px -6px rgba(63, 13, 32, 0.18);
+  --shadow-lg: 0 20px 50px -12px rgba(63, 13, 32, 0.28);
+
+  --font-sans: "Segoe UI", "Inter", "Roboto", "Helvetica Neue", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "Consolas", ui-monospace, monospace;
+
+  --sidebar-w: 264px;
+  --header-h: 68px;
+  --tap: 48px; /* altura mínima de toque (campos e botões grandes) */
+}

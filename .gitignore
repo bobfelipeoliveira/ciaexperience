@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+# NUNCA versionar dados de pacientes
+*.xlsx
+*.xls
+*.csv
+backup*/
+tsconfig.tsbuildinfo
