@@ -119,10 +119,11 @@ As tabelas, regras de segurança, alertas e funções já estão prontas em 3 ar
 | 2º | `supabase/migrations/002_modulo_coletas_urina.sql` | solicitações, reagendamentos, anexos, exportações, importações, alertas |
 | 3º | `supabase/migrations/003_armazenamento_anexos.sql` | pasta privada de anexos e suas permissões |
 | 4º | `supabase/migrations/004_prioridades_eletiva_urgente.sql` | prioridades somente ELETIVA e URGENTE |
+| 5º | `supabase/migrations/005_rotas_de_urina.sql` | rotas de urina (logística territorial) |
 
 ## 6. Executar os scripts SQL (passo a passo)
 
-Repita para **cada arquivo, na ordem 001 → 002 → 003 → 004**:
+Repita para **cada arquivo, na ordem 001 → 002 → 003 → 004 → 005**:
 
 1. No GitHub, abra o arquivo (ex.: `supabase/migrations/001_nucleo_plataforma.sql`).
 2. Clique no botão **Copy raw file** (ícone de duas folhas, à direita, acima do código).
@@ -305,6 +306,21 @@ Em **Nova coleta → Bloco inteligente**, a técnica pode:
 
 A mensagem digitada tem prioridade sobre o print (ex.: o familiar e o telefone que confirmaram vêm da mensagem). Contradições — como "sem material" e "Material na casa: SIM" no mesmo texto — viram pergunta, nunca uma escolha automática.
 A imagem é lida **no próprio navegador** e não é enviada a nenhum serviço. Ela só fica guardada se a técnica marcar **"Anexar a(s) imagem(ns) à solicitação"**.
+
+## 16b. Rotas de urina (logística territorial)
+
+Menu **Rotas de urina**:
+1. **Análise territorial** — coletas em aberto por região × dia (próximos 7 dias) e o mínimo de rotas por dia.
+2. Escolha a data e clique em **Montar rotas sugeridas**: o sistema agrupa por **região e bairros próximos** (até 4 por rota),
+   coloca as **URGENTES primeiro**, ordena pelo menor caminho a partir da **base**, estima horários e divide a rota se passar do horário-limite.
+   Coletas combinadas para a tarde viram **rotas da tarde** (saída 13:30, até 17:30).
+3. O(a) **enfermeiro(a) líder do dia** revisa (mover, reordenar, otimizar), escolhe o profissional e clica em **Validar rota**.
+   A validação grava o profissional nas coletas. Rotas validadas ficam travadas (podem ser reabertas).
+4. **Copiar roteiro** (texto pronto para o WhatsApp do profissional) e **Google Maps** (somente endereços, sem nomes).
+
+Quem valida precisa do perfil **Coordenação** no módulo (Usuários → marcar "Coordenação · Coletas de Urina").
+Configure a **base de saída**, o máximo por rota e os horários em **Configurações → Regras da operação**.
+As estimativas usam distância em linha reta × 1,4 e velocidade média; não consideram trânsito.
 
 ## 16. Importar a planilha atual
 

@@ -161,3 +161,10 @@ filha)|Tel Celular(21990000002 Denise filha)`;
   assert.equal(r.city.value, 'São Gonçalo');
   assert.match(r.address.value?.complement ?? '', /Lote 5/);
 });
+
+test('endereço sem "Rua/Av." antes do nome', () => {
+  const a = parseAddress('Lúcio Costa, 375, Barra da Tijuca, Rio de Janeiro');
+  assert.equal(a.street, 'Lúcio Costa');
+  assert.equal(a.number, '375');
+  assert.equal(a.neighborhood, 'Barra da Tijuca');
+});

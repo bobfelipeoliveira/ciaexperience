@@ -6,6 +6,7 @@ import { Icon } from '../components/Icon';
 import { friendlyError } from '../lib/errors';
 import { fmtDateTime } from '../lib/dates';
 import { useAuth } from '../auth/AuthProvider';
+import { findCity, findNeighborhood } from '../../modules/urine-collection/geo/gazetteer';
 
 type Tab = 'perfil' | 'operacao' | 'setores' | 'auditoria' | 'privacidade';
 
@@ -58,7 +59,10 @@ function ProfileTab() {
   );
 }
 
-const SETTINGS: { key: string; label: string; hint: string; type: 'number' | 'bool' | 'email' }[] = [
+const SETTINGS: { key: string; label: string; hint: string; type: 'number' | 'bool' | 'email' | 'time' }[] = [
+  { key: 'urine.route_max_stops', label: 'Rotas: máximo de coletas por rota', hint: 'Pequenas rotas de urina (padrão 4).', type: 'number' },
+  { key: 'urine.route_start_time', label: 'Rotas: horário de saída da base', hint: 'Ex.: 07:30.', type: 'time' },
+  { key: 'urine.route_deadline', label: 'Rotas: horário-limite para terminar', hint: 'Prazo de entrega no laboratório (ex.: 11:00). Rotas que passam disso são divididas.', type: 'time' },
   { key: 'urine.volume_alert_threshold', label: 'Limite do alerta de volume (coletas para amanhã)', hint: 'Alerta quando houver MAIS que este número.', type: 'number' },
   { key: 'urine.stale_hours', label: 'Horas sem atualização para alertar', hint: 'Solicitações em aberto sem nenhuma alteração.', type: 'number' },
   { key: 'urine.proximity_km', label: 'Distância para sugerir agrupamento (km)', hint: 'Linha reta entre centros de bairro.', type: 'number' },
@@ -78,7 +82,9 @@ function OperationTab() {
     if (error) setError(friendlyError(error)); else setValues(Object.fromEntries((data ?? []).map((r) => [r.key, r.value])));
   }, []);
   useEffect(() => { void load(); }, [load]);
-  async function save(key: string, value: unknown) {
+  async function save(key: string, raw: unknown) {
+    // o banco não aceita valor nulo: "vazio" é gravado como {} (base) ou "" (textos)
+    const value = raw === null || raw === undefined ? (key === 'urine.route_base' ? {} : '') : raw;
     const { error, count } = await supabase.from('system_settings').update({ value }, { count: 'exact' }).eq('key', key);
     if (error || !count) toast('error', error ? friendlyError(error) : 'Sem permissão.'); else { toast('success', 'Configuração salva.'); await load(); }
   }
@@ -87,15 +93,48 @@ function OperationTab() {
   return (
     <section className="card stack" style={{ maxWidth: 820 }}>
       {!isAdmin && <AlertBox kind="info">Somente administradores alteram estas regras.</AlertBox>}
+      <RouteBaseSetting value={(values['urine.route_base'] as BaseValue | null)?.lat !== undefined ? values['urine.route_base'] as BaseValue : null} disabled={!isAdmin} onSave={(v) => void save('urine.route_base', v)} />
       {SETTINGS.map((s) => <SettingRow key={s.key} def={s} value={values[s.key]} disabled={!isAdmin} onSave={(v) => void save(s.key, v)} />)}
     </section>
+  );
+}
+
+type BaseValue = { label: string; lat: number; lng: number };
+/** Base de saída das rotas: por bairro/cidade (base local) ou coordenadas. */
+function RouteBaseSetting({ value, disabled, onSave }: { value: BaseValue | null; disabled: boolean; onSave: (v: BaseValue | null) => void }) {
+  const [text, setText] = useState(value?.label ?? '');
+  const [coord, setCoord] = useState(value ? `${value.lat}, ${value.lng}` : '');
+  useEffect(() => { setText(value?.label ?? ''); setCoord(value ? `${value.lat}, ${value.lng}` : ''); }, [value]);
+  const m = coord.match(/^\s*(-?\d{1,2}(?:[.,]\d+)?)\s*[,;]\s*(-?\d{1,3}(?:[.,]\d+)?)\s*$/);
+  const manual = m ? { lat: Number(m[1].replace(',', '.')), lng: Number(m[2].replace(',', '.')) } : null;
+  const parts = text.split(/[,–-]/).map((x) => x.trim()).filter(Boolean);
+  const place = findNeighborhood(parts[0], parts[1]) ?? findCity(parts[parts.length - 1]);
+  const result = manual && manual.lat > -24 && manual.lat < -20 && manual.lng > -45.5 && manual.lng < -40.5 ? { ...manual, src: 'coordenadas informadas' } : place ? { lat: place.lat, lng: place.lng, src: `centro aproximado de ${place.name}` } : null;
+  return (
+    <div className="stack-sm" style={{ borderBottom: '1px solid var(--line-200)', paddingBottom: 14 }}>
+      <b>Rotas: base de saída (sede da Solar)</b>
+      <div className="grid-2">
+        <TextInput label="Nome / bairro da base" value={text} onChange={setText} disabled={disabled} placeholder="Ex.: Sede Solar — Tijuca, Rio de Janeiro" hint="Use o bairro e a cidade; a posição é aproximada pelo bairro." />
+        <TextInput label="Coordenadas exatas (opcional)" value={coord} onChange={setCoord} disabled={disabled} placeholder="-22.9250, -43.2330" hint="Botão direito no Google Maps → copiar coordenadas." />
+      </div>
+      <div className="row-between small">
+        <span className="muted">{result ? `Posição: ${result.lat.toFixed(4)}, ${result.lng.toFixed(4)} (${result.src})` : value ? `Atual: ${value.label}` : 'Base ainda não configurada.'}</span>
+        {!disabled && (
+          <div className="row">
+            {value && <button className="btn btn-ghost btn-sm" onClick={() => onSave(null)}>Remover base</button>}
+            <button className="btn btn-secondary btn-sm" disabled={!result || !text.trim()} onClick={() => result && onSave({ label: text.trim().slice(0, 120), lat: Number(result.lat.toFixed(6)), lng: Number(result.lng.toFixed(6)) })}>Salvar base</button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
 function SettingRow({ def, value, disabled, onSave }: { def: (typeof SETTINGS)[number]; value: unknown; disabled: boolean; onSave: (v: unknown) => void }) {
   const [v, setV] = useState(value === null || value === undefined ? '' : String(value));
   useEffect(() => setV(value === null || value === undefined ? '' : String(value)), [value]);
-  const valid = def.type === 'number' ? /^\d+(\.\d+)?$/.test(v) && Number(v) > 0 && Number(v) < 10000
+  const valid = def.type === 'time' ? /^([01]\d|2[0-3]):[0-5]\d$/.test(v)
+    : def.type === 'number' ? /^\d+(\.\d+)?$/.test(v) && Number(v) > 0 && Number(v) < 10000
     : def.type === 'email' ? v === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) : true;
   const parsed = def.type === 'number' ? Number(v) : def.type === 'bool' ? v === 'true' : v === '' ? null : v.trim().toLowerCase();
   return (
@@ -104,7 +143,7 @@ function SettingRow({ def, value, disabled, onSave }: { def: (typeof SETTINGS)[n
         {def.type === 'bool' ? (
           <SelectInput label={def.label} value={v} onChange={setV} options={[{ value: 'false', label: 'Não' }, { value: 'true', label: 'Sim' }]} hint={def.hint} />
         ) : (
-          <TextInput label={def.label} value={v} onChange={setV} type={def.type === 'number' ? 'number' : 'email'} hint={def.hint} disabled={disabled} error={!valid ? 'Valor inválido.' : null} />
+          <TextInput label={def.label} value={v} onChange={setV} type={def.type === 'number' ? 'number' : def.type === 'time' ? 'time' : 'email'} hint={def.hint} disabled={disabled} error={!valid ? 'Valor inválido.' : null} />
         )}
       </div>
       {!disabled && <button className="btn btn-secondary" disabled={!valid || String(parsed ?? '') === String(value ?? '')} onClick={() => onSave(parsed)}>Salvar</button>}

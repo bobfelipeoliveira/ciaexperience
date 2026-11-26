@@ -143,7 +143,8 @@ export function parseAddress(input: string | null | undefined): ParsedAddress {
       unknown.splice(unknown.indexOf(cand), 1);
     }
   }
-  if (!out.street && unknown.length && /[a-z]/i.test(unknown[0]) && unknown[0].split(' ').length >= 2 && !out.neighborhood) {
+  // logradouro sem "Rua/Av." (ex.: "Lúcio Costa, 375, Barra da Tijuca"): o 1º trecho desconhecido antes do número
+  if (!out.street && unknown.length && /[a-z]/i.test(unknown[0]) && (unknown[0].split(' ').length >= 2 || out.number)) {
     out.street = unknown.shift()!;
   }
 

@@ -8,6 +8,7 @@ const RequestsListPage = lazy(() => import('./pages/RequestsListPage'));
 const RequestDetailPage = lazy(() => import('./pages/RequestDetailPage'));
 const AgendaPage = lazy(() => import('./pages/AgendaPage'));
 const MapPage = lazy(() => import('./pages/MapPage'));
+const RoutesPage = lazy(() => import('./pages/RoutesPage'));
 const AlertsPage = lazy(() => import('./pages/AlertsPage'));
 const IndicatorsPage = lazy(() => import('./pages/IndicatorsPage'));
 const ReportsPage = lazy(() => import('./pages/ReportsPage'));
@@ -27,6 +28,7 @@ export const urineCollectionModule: PlatformModule = {
     { to: '/coletas/nova', label: 'Nova coleta', icon: 'plus' },
     { to: '/coletas', label: 'Solicitações', icon: 'list', end: true },
     { to: '/agenda', label: 'Agenda', icon: 'calendar' },
+    { to: '/rotas', label: 'Rotas de urina', icon: 'route' },
     { to: '/mapa', label: 'Mapa operacional', icon: 'map', roles: ['coordenacao'] },
     { to: '/alertas', label: 'Alertas', icon: 'bell', badge: 'alerts' },
     { to: '/indicadores', label: 'Indicadores', icon: 'chart', roles: ['coordenacao'] },
@@ -38,6 +40,7 @@ export const urineCollectionModule: PlatformModule = {
     { path: '/coletas', element: RequestsListPage },
     { path: '/coletas/:id', element: RequestDetailPage },
     { path: '/agenda', element: AgendaPage },
+    { path: '/rotas', element: RoutesPage },
     { path: '/mapa', element: MapPage, roles: ['coordenacao'] },
     { path: '/alertas', element: AlertsPage },
     { path: '/indicadores', element: IndicatorsPage, roles: ['coordenacao'] },

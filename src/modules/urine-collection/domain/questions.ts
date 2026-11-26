@@ -72,7 +72,7 @@ export function buildQuestions(v: UrineRequestInput, today: string, duplicates: 
   }
   if (!v.priority) {
     q.push({
-      id: 'priority', field: 'priority', severity: 'normal', text: 'Qual a prioridade desta coleta?',
+      id: 'priority', field: 'priority', severity: 'critical', text: 'Esta coleta é ELETIVA ou URGENTE?',
       options: [{ label: 'ELETIVA', value: 'ELETIVA' }, { label: 'URGENTE', value: 'URGENTE' }],
     });
   }
