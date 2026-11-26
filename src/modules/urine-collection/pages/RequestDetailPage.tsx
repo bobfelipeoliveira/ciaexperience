@@ -98,7 +98,7 @@ export default function RequestDetailPage() {
         ) : undefined}
       />
 
-      {r.priority === 'EMERGENCIAL' && isActiveStatus(r.status) && <AlertBox kind="critical" title="Coleta EMERGENCIAL">{r.emergency_justification}</AlertBox>}
+      {r.priority === 'URGENTE' && isActiveStatus(r.status) && <AlertBox kind="critical" title="Coleta URGENTE">Priorize esta coleta.</AlertBox>}
       {r.material_available === 'NAO' && isActiveStatus(r.status) && <AlertBox kind="warning" title="Sem material na residência">Responsável: {r.material_responsible ?? 'não definido'}{r.material_deadline ? ` · prazo ${fmtDate(r.material_deadline)}` : ''}</AlertBox>}
       {r.entry_mode === 'IMPORTACAO' && <AlertBox kind="info" title="Registro importado da planilha">Os valores originais da planilha estão preservados no histórico deste registro.</AlertBox>}
       {!canEdit && !r.archived_at && <AlertBox kind="info">Você pode consultar esta solicitação. Alterações são feitas por quem a criou ou pela coordenação.</AlertBox>}
@@ -127,7 +127,7 @@ export default function RequestDetailPage() {
               <dt>Forma de coleta</dt><dd><V v={r.collection_method} fmt={(x: string) => label(METHODS, x)} /></dd>
               <dt>Origem</dt><dd><V v={r.origin} fmt={(x: string) => label(ORIGINS, x)} /></dd>
               <dt>Prioridade</dt><dd><PriorityBadge priority={r.priority} /></dd>
-              {r.emergency_justification && <><dt>Justificativa</dt><dd>{r.emergency_justification}</dd></>}
+              {r.emergency_justification && <><dt>Justificativa (registro antigo)</dt><dd>{r.emergency_justification}</dd></>}
               <dt>Material (potinho)</dt><dd><V v={r.material_available} fmt={(x: string) => label(MATERIAL, x)} /></dd>
               <dt>Recebida em</dt><dd><V v={r.received_date} fmt={fmtDate} /> {r.receipt_shift && <span className="muted">· {label(SHIFTS, r.receipt_shift)}</span>}</dd>
               <dt>Responsável agendamento</dt><dd><V v={r.scheduler_name} /></dd>

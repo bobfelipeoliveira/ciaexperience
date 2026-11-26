@@ -65,12 +65,7 @@ export function RequestForm({ value: v, onChange, errors, inferred = {}, lockSch
         <ChoiceChips<Origin> label="Origem da solicitação" required value={v.origin} onChange={set('origin')} options={opts(ORIGINS)} error={errors.origin} />
         <ChoiceChips<Priority> label="Prioridade" required value={v.priority} onChange={set('priority')} options={opts(PRIORITIES)}
           chipClass={(p) => `prio-${p}`} error={errors.priority} hint="A prioridade é independente da origem." />
-        {v.priority === 'EMERGENCIAL' && (
-          <>
-            <AlertBox kind="critical" title="Coleta EMERGENCIAL">A coordenação será notificada imediatamente ao salvar.</AlertBox>
-            <TextArea label="Justificativa da emergência" required value={v.emergency_justification} onChange={str('emergency_justification')} maxLength={1000} rows={2} error={errors.emergency_justification} />
-          </>
-        )}
+        {v.priority === 'URGENTE' && <AlertBox kind="warning" title="Coleta URGENTE">A coordenação será notificada ao salvar.</AlertBox>}
       </Section>
 
       <Section n="C" title="Material na residência" id="sec-material">
@@ -150,7 +145,6 @@ export function normalizeInputForSave(v: UrineRequestInput): UrineRequestInput {
     address_raw: t(v.address_raw), address_street: t(v.address_street), address_number: t(v.address_number),
     address_complement: t(v.address_complement), neighborhood: t(v.neighborhood), city: t(v.city),
     state: v.state ? v.state.toUpperCase() : null, cep: t(v.cep), address_reference: t(v.address_reference),
-    emergency_justification: v.priority === 'EMERGENCIAL' ? t(v.emergency_justification) : t(v.emergency_justification),
     material_responsible: t(v.material_responsible), notes: t(v.notes),
     scheduled_time: v.scheduled_period === 'HORARIO' ? v.scheduled_time : null,
   };

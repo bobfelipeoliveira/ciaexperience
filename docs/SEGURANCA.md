@@ -11,7 +11,7 @@ autorização é aplicada no PostgreSQL do Supabase por **Row Level Security (RL
 **Controles verificados por teste automatizado em banco PostgreSQL (16 cenários):** perfil forjado via metadados do cadastro
 fica pendente e sem papéis; técnica não se autoaprova, não chama funções administrativas, não arquiva, não edita registro de
 terceiros, não importa e não exclui anexos de outra pessoa; usuário pendente e anônimo não leem dados; upload fora da pasta da
-solicitação é recusado; regras de negócio (emergência exige justificativa, realizada exige data, cancelamento exige motivo,
+solicitação é recusado; regras de negócio (prioridade somente ELETIVA ou URGENTE, realizada exige data, cancelamento exige motivo,
 data agendada só muda por reagendamento) são impostas no banco.
 
 **Não há vulnerabilidade Crítica ou Alta conhecida.** Restam riscos **Médios/Baixos** ligados a limites do plano gratuito

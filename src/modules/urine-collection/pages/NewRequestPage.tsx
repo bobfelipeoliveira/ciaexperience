@@ -28,7 +28,6 @@ function applyExtraction(ex: ExtractionResult, base: UrineRequestInput) {
   take('collection_method', ex.collection_method);
   take('origin', ex.origin);
   take('priority', ex.priority);
-  take('emergency_justification', ex.emergency_justification);
   take('received_date', ex.received_date);
   take('receipt_shift', ex.receipt_shift);
   take('scheduled_date', ex.scheduled_date);
@@ -162,7 +161,7 @@ export default function NewRequestPage() {
     if (Object.keys(errors).length) {
       toast('error', 'Revise os campos destacados antes de salvar.');
       const first = Object.keys(errors)[0];
-      const sec = ['origin', 'priority', 'emergency_justification'].includes(first) ? 'sec-origem' : first === 'patient_name' ? 'sec-identificacao' : first === 'cep' || first === 'state' ? 'sec-endereco' : 'sec-agendamento';
+      const sec = ['origin', 'priority'].includes(first) ? 'sec-origem' : first === 'patient_name' ? 'sec-identificacao' : first === 'cep' || first === 'state' ? 'sec-endereco' : 'sec-agendamento';
       goTo(sec);
       return;
     }

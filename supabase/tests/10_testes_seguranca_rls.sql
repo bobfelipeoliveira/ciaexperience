@@ -40,10 +40,10 @@ select public.admin_set_user_role('00000000-0000-0000-0000-0000000000c1','coorde
 select pg_temp.expect_fail($$select public.admin_set_user_status(auth.uid(),'blocked')$$, 'admin bloqueia a si mesmo');
 
 select pg_temp.as_user('00000000-0000-0000-0000-0000000000e1');
-select pg_temp.expect_fail($$insert into urine_collection_requests(patient_name,priority) values ('Maria da Silva','EMERGENCIAL')$$, 'emergencial sem justificativa');
+select pg_temp.expect_fail($$insert into urine_collection_requests(patient_name,priority) values ('Maria da Silva','EMERGENCIAL')$$, 'prioridade EMERGENCIAL (não existe mais)');
 select pg_temp.expect_fail($$insert into urine_collection_requests(patient_name,status) values ('Maria da Silva','REALIZADA')$$, 'realizada sem data de coleta');
 insert into urine_collection_requests(patient_name,priority,emergency_justification,scheduled_date,contact_phone,created_by,material_available)
- values ('Maria  da Sílva','EMERGENCIAL','Febre e disúria intensa', public.today_sp()+1,'(21) 99999-9999','00000000-0000-0000-0000-0000000000a1','NAO');
+ values ('Maria  da Sílva','URGENTE',null, public.today_sp()+1,'(21) 99999-9999','00000000-0000-0000-0000-0000000000a1','NAO');
 select 'created_by carimbado corretamente: '||(created_by='00000000-0000-0000-0000-0000000000e1')||' norm='||patient_name_norm||' fone='||phone_digits from urine_collection_requests;
 insert into urine_collection_requests(patient_name,scheduled_date,neighborhood,city,family_contact_name,assigned_nurse_name,material_available) select 'Paciente '||g, public.today_sp()+1,'Penha','Rio de Janeiro','Ana','Enf X','SIM' from generate_series(1,3) g;
 select pg_temp.expect_fail($$update urine_collection_requests set archived_at=now() where patient_name='Paciente 1'$$, 'tecnica arquiva');

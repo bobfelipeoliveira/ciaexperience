@@ -118,10 +118,11 @@ As tabelas, regras de segurança, alertas e funções já estão prontas em 3 ar
 | 1º | `supabase/migrations/001_nucleo_plataforma.sql` | usuários, perfis, setores, módulos, configurações, notificações, auditoria |
 | 2º | `supabase/migrations/002_modulo_coletas_urina.sql` | solicitações, reagendamentos, anexos, exportações, importações, alertas |
 | 3º | `supabase/migrations/003_armazenamento_anexos.sql` | pasta privada de anexos e suas permissões |
+| 4º | `supabase/migrations/004_prioridades_eletiva_urgente.sql` | prioridades somente ELETIVA e URGENTE |
 
 ## 6. Executar os scripts SQL (passo a passo)
 
-Repita para **cada arquivo, na ordem 001 → 002 → 003**:
+Repita para **cada arquivo, na ordem 001 → 002 → 003 → 004**:
 
 1. No GitHub, abra o arquivo (ex.: `supabase/migrations/001_nucleo_plataforma.sql`).
 2. Clique no botão **Copy raw file** (ícone de duas folhas, à direita, acima do código).

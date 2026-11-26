@@ -10,7 +10,6 @@ export function validateInput(v: UrineRequestInput, today: string, extra?: { sta
   if (v.patient_age !== null && (v.patient_age < 0 || v.patient_age > 130)) e.patient_age = 'Idade inválida.';
   if (!v.origin) e.origin = 'Selecione a origem.';
   if (!v.priority) e.priority = 'Selecione a prioridade.';
-  if (v.priority === 'EMERGENCIAL' && (v.emergency_justification ?? '').trim().length < 5) e.emergency_justification = 'Coleta emergencial exige justificativa.';
   for (const k of ['received_date', 'scheduled_date', 'material_deadline'] as const) {
     if (v[k] && !isValidISODate(v[k]!)) e[k] = 'Data inválida.';
   }

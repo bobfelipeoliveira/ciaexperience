@@ -35,9 +35,6 @@ export function buildQuestions(v: UrineRequestInput, today: string, duplicates: 
   if (!v.patient_name?.trim()) {
     q.push({ id: 'name', field: 'patient_name', severity: 'critical', text: 'Não identifiquei o nome do paciente. Qual é o nome completo?', freeText: true });
   }
-  if (v.priority === 'EMERGENCIAL' && (v.emergency_justification ?? '').trim().length < 5) {
-    q.push({ id: 'just', field: 'emergency_justification', severity: 'critical', text: 'Essa solicitação é emergencial. Informe a justificativa.', freeText: true });
-  }
   for (const c of conflicts) {
     if (/CVA e CVD/.test(c) && !v.collection_method) {
       q.push({ id: 'conflict-method', field: 'collection_method', severity: 'normal', text: c, options: [{ label: 'CVA', value: 'CVA' }, { label: 'CVD', value: 'CVD' }] });
@@ -69,7 +66,7 @@ export function buildQuestions(v: UrineRequestInput, today: string, duplicates: 
   if (!v.priority) {
     q.push({
       id: 'priority', field: 'priority', severity: 'normal', text: 'Qual a prioridade desta coleta?',
-      options: [{ label: 'ELETIVA', value: 'ELETIVA' }, { label: 'URGENTE', value: 'URGENTE' }, { label: 'EMERGENCIAL', value: 'EMERGENCIAL' }],
+      options: [{ label: 'ELETIVA', value: 'ELETIVA' }, { label: 'URGENTE', value: 'URGENTE' }],
     });
   }
   if (!v.origin) {

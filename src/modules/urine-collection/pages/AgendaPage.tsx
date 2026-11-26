@@ -20,7 +20,7 @@ function Slot({ r }: { r: UrineRequest }) {
       <b style={{ overflowWrap: 'anywhere' }}>{r.patient_name}</b>
       <span className="muted">{r.scheduled_period ? label(PERIODS, r.scheduled_period) : 'Período N/I'}{r.scheduled_time ? ` · ${r.scheduled_time.slice(0, 5)}` : ''} · {r.collection_method ?? 'forma N/I'}</span>
       <span className="muted">{[r.neighborhood, r.city].filter(Boolean).join(', ') || 'Endereço N/I'}</span>
-      <span className="row" style={{ gap: 4 }}><StatusBadge status={r.status} />{r.priority === 'EMERGENCIAL' && <PriorityBadge priority={r.priority} />}</span>
+      <span className="row" style={{ gap: 4 }}><StatusBadge status={r.status} />{r.priority === 'URGENTE' && <PriorityBadge priority={r.priority} />}</span>
     </button>
   );
 }

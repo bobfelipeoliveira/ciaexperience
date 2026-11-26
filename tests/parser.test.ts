@@ -44,8 +44,7 @@ test('negativas, emergência, CVD, ticket e data explícita', () => {
   assert.equal(r.patient_name.value, 'Jose Carlos Pereira');
   assert.equal(r.collection_method.value, 'CVD');
   assert.equal(r.origin.value, 'TICKET_ELETIVO');
-  assert.equal(r.priority.value, 'EMERGENCIAL');
-  assert.match(r.emergency_justification.value ?? '', /febre alta/);
+  assert.equal(r.priority.value, 'URGENTE', 'emergencial é tratado como URGENTE');
   assert.equal(r.material_available.value, 'NAO');
   assert.equal(r.scheduled_date.value, '2026-11-27');
   assert.equal(r.scheduled_time.value, '09:00');

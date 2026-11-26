@@ -35,7 +35,7 @@ create table if not exists public.urine_collection_requests (
 
   -- B/C. Origem e prioridade (independentes)
   origin                   text check (origin in ('INTERCORRENCIA','TICKET_ELETIVO','DEMANDA_EXTERNA')),
-  priority                 text check (priority in ('ELETIVA','URGENTE','EMERGENCIAL')),
+  priority                 text check (priority in ('ELETIVA','URGENTE')),
   emergency_justification  text check (char_length(emergency_justification) <= 1000),
 
   -- D. Material na residência
@@ -107,9 +107,6 @@ create table if not exists public.urine_collection_requests (
   status_changed_at        timestamptz not null default now(),
 
   -- Regras de negócio validadas NO BANCO
-  constraint ucr_emergency_justification check (
-    priority is distinct from 'EMERGENCIAL'
-    or char_length(btrim(coalesce(emergency_justification, ''))) >= 5),
   constraint ucr_done_requires_date check (status <> 'REALIZADA' or collected_date is not null),
   constraint ucr_cancel_requires_reason check (
     status not in ('CANCELADA','NAO_REALIZADA')
@@ -240,21 +237,21 @@ drop trigger if exists ucr_touch on public.urine_collection_requests;
 create trigger ucr_touch before update on public.urine_collection_requests
   for each row execute function public.touch_updated_at();
 
--- Notificação de emergência (sem repetição: uma por solicitação)
+-- Notificação de coleta URGENTE para a coordenação (sem repetição: uma por solicitação)
 create or replace function public.urine_request_after_write()
 returns trigger language plpgsql security definer
 set search_path = ''
 as $$
 begin
-  if new.priority = 'EMERGENCIAL' and new.archived_at is null
+  if new.priority = 'URGENTE' and new.archived_at is null
      and new.status not in ('REALIZADA','CANCELADA','NAO_REALIZADA')
-     and (tg_op = 'INSERT' or old.priority is distinct from 'EMERGENCIAL') then
+     and (tg_op = 'INSERT' or old.priority is distinct from 'URGENTE') then
     perform public.notify_users(
       public.module_staff_ids('urine_collection', array['coordenacao']),
-      'urine_collection', 'urine_emergency', 'critical',
-      'Coleta EMERGENCIAL registrada',
+      'urine_collection', 'urine_urgent', 'warning',
+      'Coleta URGENTE registrada',
       'Paciente ' || new.patient_name || coalesce(' — agendada para ' || to_char(new.scheduled_date, 'DD/MM/YYYY'), ' — sem data definida') || '.',
-      '/coletas/' || new.id::text, 'urine_emergency:' || new.id::text);
+      '/coletas/' || new.id::text, 'urine_urgent:' || new.id::text);
   end if;
   return new;
 end $$;
@@ -506,7 +503,7 @@ begin
     )
     select 1 ord, 'VOLUME_AMANHA' k, 'critical' sev, 'ALERTA OPERACIONAL' tit,
            array_agg(id order by scheduled_date) ids from a where scheduled_date = v_tomorrow
-    union all select 2, 'EMERGENCIAL', 'critical', 'Coletas emergenciais em aberto', array_agg(id) from a where priority = 'EMERGENCIAL'
+    union all select 2, 'URGENTE', 'warning', 'Coletas urgentes em aberto', array_agg(id) from a where priority = 'URGENTE'
     union all select 3, 'ATRASADA', 'critical', 'Coletas atrasadas', array_agg(id) from a where scheduled_date < v_today
     union all select 4, 'SEM_MATERIAL', 'warning', 'Falta de material na residência', array_agg(id) from a where material_available = 'NAO'
     union all select 5, 'MATERIAL_NAO_CONFIRMADO', 'warning', 'Material não confirmado', array_agg(id) from a
@@ -532,7 +529,7 @@ begin
     message := case c.k
       when 'VOLUME_AMANHA' then 'Existem ' || total || ' coletas programadas para amanhã (' || to_char(v_tomorrow, 'DD/MM')
                                 || '). Avalie a distribuição e a logística.'
-      when 'EMERGENCIAL' then total || ' solicitação(ões) EMERGENCIAL(IS) aguardando execução.'
+      when 'URGENTE' then total || ' solicitação(ões) URGENTE(S) aguardando execução.'
       when 'ATRASADA' then total || ' coleta(s) com data agendada vencida e sem registro de realização.'
       when 'SEM_MATERIAL' then total || ' solicitação(ões) sem material disponível na residência. Providenciar.'
       when 'MATERIAL_NAO_CONFIRMADO' then total || ' solicitação(ões) sem confirmação de material (potinho) na residência.'

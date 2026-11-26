@@ -164,8 +164,7 @@ button.stat:hover { border-color: var(--solar-pink-300); box-shadow: var(--shado
 .chip:hover { border-color: var(--solar-pink-300); }
 .chip[aria-pressed="true"] { background: var(--solar-wine-700); color: #fff; border-color: var(--solar-wine-700); }
 .chip.prio-ELETIVA[aria-pressed="true"] { background: var(--solar-purple-600); border-color: var(--solar-purple-600); }
-.chip.prio-URGENTE[aria-pressed="true"] { background: #b86e00; border-color: #b86e00; }
-.chip.prio-EMERGENCIAL[aria-pressed="true"] { background: var(--crit-700); border-color: var(--crit-700); }
+.chip.prio-URGENTE[aria-pressed="true"] { background: var(--crit-700); border-color: var(--crit-700); }
 .chip.chip-none[aria-pressed="true"] { background: var(--surface-100); color: var(--ink-700); border-color: var(--ink-500); }
 
 .form-section { border: 1px solid var(--line-200); border-radius: var(--radius-lg); padding: 18px; background: #fff; }

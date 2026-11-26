@@ -225,8 +225,8 @@ export function extractFromText(text: string, ctx: ExtractionContext): Extractio
 
   // ---------- Prioridade (independente da origem) ----------
   const prio: [RegExp, Priority][] = [
-    [/emergencia[l]?|emergencial/, 'EMERGENCIAL'],
-    [/\burgent[e]\b|\burgencia\b/, 'URGENTE'],
+    // "emergencial/emergência" é tratado como URGENTE (a operação usa apenas ELETIVA e URGENTE)
+    [/emergencia[l]?|emergencial|\burgent[e]\b|\burgencia\b/, 'URGENTE'],
     [/\beletiv[ao]\b/, 'ELETIVA'],
   ];
   for (const [re, p] of prio) {

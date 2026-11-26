@@ -14,7 +14,7 @@ export interface Cluster {
   pathKm: number;
   estTravelMin: number;
   estTotalMin: number;
-  hasEmergency: boolean;
+  hasUrgent: boolean;
 }
 
 export function clusterPoints(points: GeoPoint[], maxKm: number, serviceMin: number, speedKmh: number): Cluster[] {
@@ -57,7 +57,7 @@ export function clusterPoints(points: GeoPoint[], maxKm: number, serviceMin: num
         pathKm: Math.round(roadKm * 10) / 10,
         estTravelMin: travel,
         estTotalMin: travel + g.length * serviceMin,
-        hasEmergency: g.some((p) => p.priority === 'EMERGENCIAL'),
+        hasUrgent: g.some((p) => p.priority === 'URGENTE'),
       });
     }
   }

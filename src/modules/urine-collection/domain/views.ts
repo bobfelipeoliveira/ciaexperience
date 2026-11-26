@@ -12,7 +12,7 @@ export const VIEWS: Record<string, { label: string; test: (r: UrineRequest, toda
   pendentes: { label: 'Coletas pendentes', test: (r) => PENDING_STATUSES.includes(r.status) },
   reagendadas: { label: 'Coletas reagendadas', test: (r) => r.status === 'REAGENDADA' || (r.reschedule_count ?? 0) > 0 },
   canceladas: { label: 'Coletas canceladas', test: (r) => r.status === 'CANCELADA' },
-  emergenciais: { label: 'Solicitações emergenciais', test: (r) => r.priority === 'EMERGENCIAL' },
+  urgentes: { label: 'Solicitações urgentes', test: (r) => r.priority === 'URGENTE' },
   sem_material: { label: 'Sem material na residência', test: (r) => r.material_available === 'NAO' },
   atrasadas: { label: 'Coletas atrasadas', test: (r, t) => !!r.scheduled_date && r.scheduled_date < t && isActiveStatus(r.status) },
 };

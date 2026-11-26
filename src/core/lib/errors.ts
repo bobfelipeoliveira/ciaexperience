@@ -12,7 +12,6 @@ export function friendlyError(err: unknown): string {
   if (m.includes('rate limit') || m.includes('too many')) return 'Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente novamente.';
   if (m.includes('jwt expired') || m.includes('refresh token')) return 'Sua sessão expirou. Entre novamente.';
   if (code === '42501' || m.includes('row-level security') || m.includes('permission denied')) return 'Você não tem permissão para esta ação.';
-  if (m.includes('ucr_emergency_justification')) return 'Prioridade EMERGENCIAL exige justificativa (mínimo 5 caracteres).';
   if (m.includes('ucr_done_requires_date')) return 'Para marcar como REALIZADA, informe a data da coleta.';
   if (m.includes('ucr_cancel_requires_reason')) return 'Informe o motivo do cancelamento / não realização.';
   if (m.includes('ucr_time_requires_period')) return 'Para informar horário, escolha o período "Horário definido".';

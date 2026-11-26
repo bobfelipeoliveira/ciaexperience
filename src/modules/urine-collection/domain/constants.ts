@@ -9,7 +9,6 @@ export type Origin = keyof typeof ORIGINS;
 export const PRIORITIES = {
   ELETIVA: 'ELETIVA',
   URGENTE: 'URGENTE',
-  EMERGENCIAL: 'EMERGENCIAL',
 } as const;
 export type Priority = keyof typeof PRIORITIES;
 
@@ -68,13 +67,11 @@ export const STATUS_TONE: Record<Status, string> = {
 
 export const PRIORITY_TONE: Record<Priority, string> = {
   ELETIVA: 'b-info',
-  URGENTE: 'b-warn',
-  EMERGENCIAL: 'b-crit',
+  URGENTE: 'b-crit',
 };
 export const PRIORITY_COLOR: Record<Priority, string> = {
   ELETIVA: '#6b3fa0',
-  URGENTE: '#b86e00',
-  EMERGENCIAL: '#b4182d',
+  URGENTE: '#b4182d',
 };
 
 export const ATTACHMENT_CATEGORIES = {

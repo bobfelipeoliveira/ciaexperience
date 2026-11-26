@@ -24,7 +24,7 @@ export function originalRow(r: UrineRequest): Record<string, string> {
 }
 
 export const EXTENDED_COLUMNS = [
-  'ID', 'STATUS', 'PRIORIDADE', 'JUSTIFICATIVA EMERGENCIAL', 'IDADE', 'PERÍODO PREVISTO', 'HORÁRIO PREVISTO',
+  'ID', 'STATUS', 'PRIORIDADE', 'IDADE', 'PERÍODO PREVISTO', 'HORÁRIO PREVISTO',
   'DATA AGENDADA ATUAL', 'QTD. REAGENDAMENTOS', 'ENDEREÇO ORIGINAL', 'LOGRADOURO', 'NÚMERO', 'COMPLEMENTO', 'CIDADE', 'UF', 'CEP',
   'REFERÊNCIA', 'PROFISSIONAL PREVISTO', 'RESPONSÁVEL PELO MATERIAL', 'PRAZO DO MATERIAL', 'MOTIVO (CANCEL./NÃO REALIZ.)',
   'RESULTADO OPERACIONAL', 'FORMA DE REGISTRO', 'CRIADO EM', 'ATUALIZADO EM', 'ARQUIVADO',
@@ -33,7 +33,7 @@ export const EXTENDED_COLUMNS = [
 export function extendedRow(r: UrineRequest): Record<string, string> {
   const base = originalRow(r);
   const ext: string[] = [
-    r.id, opt(STATUSES, r.status), opt(PRIORITIES, r.priority), r.emergency_justification ?? '', r.patient_age?.toString() ?? '',
+    r.id, opt(STATUSES, r.status), opt(PRIORITIES, r.priority), r.patient_age?.toString() ?? '',
     opt(PERIODS, r.scheduled_period), r.scheduled_time?.slice(0, 5) ?? '', br(r.scheduled_date), String(r.reschedule_count ?? 0),
     r.address_raw ?? '', r.address_street ?? '', r.address_number ?? '', r.address_complement ?? '', r.city ?? '', r.state ?? '', r.cep ?? '',
     r.address_reference ?? '', r.assigned_nurse_name ?? '', r.material_responsible ?? '', br(r.material_deadline),

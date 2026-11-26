@@ -11,7 +11,7 @@ import { FiltersBar } from '../components/FiltersBar';
 import { RequestTable } from '../components/RequestTable';
 
 type Sort = 'recentes' | 'agendada' | 'paciente' | 'prioridade';
-const PRIO_ORDER: Record<string, number> = { EMERGENCIAL: 0, URGENTE: 1, ELETIVA: 2 };
+const PRIO_ORDER: Record<string, number> = { URGENTE: 0, ELETIVA: 1 };
 
 export default function RequestsListPage() {
   const { rows, loading, error, reload, includeArchived, setIncludeArchived } = useUrineData();

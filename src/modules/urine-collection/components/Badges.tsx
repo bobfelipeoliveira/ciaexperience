@@ -6,7 +6,7 @@ export function StatusBadge({ status }: { status: Status }) {
 }
 export function PriorityBadge({ priority }: { priority: Priority | null }) {
   if (!priority) return <Missing text="PRIORIDADE N/I" />;
-  return <Badge tone={PRIORITY_TONE[priority]}>{priority === 'EMERGENCIAL' ? '⚠ ' : ''}{label(PRIORITIES, priority)}</Badge>;
+  return <Badge tone={PRIORITY_TONE[priority]}>{priority === 'URGENTE' ? '⚠ ' : ''}{label(PRIORITIES, priority)}</Badge>;
 }
 export function MaterialBadge({ value }: { value: Material | null }) {
   if (!value) return <Missing text="MATERIAL N/I" />;

@@ -75,7 +75,7 @@ export default function MapPage() {
       const pos: L.LatLngExpression = [c!.lat + dy, c!.lng + dx];
       bounds.push(pos);
       const color = r.priority ? PRIORITY_COLOR[r.priority] : '#75666d';
-      const m = L.circleMarker(pos, { radius: r.priority === 'EMERGENCIAL' ? 10 : 8, color: '#fff', weight: 2, fillColor: color, fillOpacity: 0.95 });
+      const m = L.circleMarker(pos, { radius: r.priority === 'URGENTE' ? 10 : 8, color: '#fff', weight: 2, fillColor: color, fillOpacity: 0.95 });
       // Conteúdo do balão montado com textContent (sem HTML do usuário → sem XSS)
       const box = document.createElement('div');
       const b = document.createElement('b'); b.textContent = r.patient_name; box.appendChild(b);
@@ -117,7 +117,7 @@ export default function MapPage() {
       <FiltersBar rows={rows} value={filters} onChange={setFilters} compact />
       <div className="row-between">
         <div className="row small">
-          {(['ELETIVA', 'URGENTE', 'EMERGENCIAL'] as const).map((p) => (
+          {(['ELETIVA', 'URGENTE'] as const).map((p) => (
             <span key={p} className="row" style={{ gap: 6 }}><span style={{ width: 12, height: 12, borderRadius: '50%', background: PRIORITY_COLOR[p], display: 'inline-block' }} />{p}</span>
           ))}
           <span className="row" style={{ gap: 6 }}><span style={{ width: 12, height: 12, borderRadius: '50%', background: '#75666d', display: 'inline-block' }} />Prioridade N/I</span>
@@ -137,7 +137,7 @@ export default function MapPage() {
               <div key={i} className="cluster-card stack-sm">
                 <div className="row-between">
                   <b>{c.date ? fmtDate(c.date) : 'Sem data'} · {c.points.length} coletas próximas</b>
-                  {c.hasEmergency && <Badge tone="b-crit">Inclui emergencial</Badge>}
+                  {c.hasUrgent && <Badge tone="b-crit">Inclui urgente</Badge>}
                 </div>
                 <div className="small muted">Regiões: {c.regions.join(', ') || 'não identificada'}</div>
                 <ul className="small" style={{ margin: 0, paddingLeft: 18 }}>

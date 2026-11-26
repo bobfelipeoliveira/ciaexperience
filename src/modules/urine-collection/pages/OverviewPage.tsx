@@ -64,7 +64,7 @@ export default function OverviewPage() {
             <StatCard label="Pendentes" value={count('pendentes')} icon="alert" accent="var(--warn-700)" foot="aguardando info/material/confirm." onClick={() => go('pendentes')} />
             <StatCard label="Reagendadas" value={count('reagendadas')} icon="refresh" accent="var(--warn-700)" onClick={() => go('reagendadas')} />
             <StatCard label="Canceladas" value={count('canceladas')} icon="x" accent="var(--ink-500)" onClick={() => go('canceladas')} />
-            <StatCard label="Emergenciais" value={count('emergenciais')} icon="alert" accent="var(--crit-700)" onClick={() => go('emergenciais')} />
+            <StatCard label="Urgentes" value={count('urgentes')} icon="alert" accent="var(--crit-700)" onClick={() => go('urgentes')} />
             <StatCard label="Sem material" value={count('sem_material')} icon="package" accent="var(--crit-700)" onClick={() => go('sem_material')} />
           </div>
           <p className="muted small">Indicadores calculados sobre {filtered.length} de {rows.length} solicitações (filtros aplicados) · atualizado {lastUpdated ? fmtDateTime(lastUpdated.toISOString()) : '—'} · tempo real.</p>
@@ -74,7 +74,7 @@ export default function OverviewPage() {
           <StatCard label="Para hoje" value={todayRows.length} icon="clock" accent="var(--solar-pink-500)" onClick={() => go('hoje')} />
           <StatCard label="Para amanhã" value={tomorrowRows.length} icon="calendar" accent="var(--solar-purple-600)" onClick={() => go('amanha')} />
           <StatCard label="Pendentes" value={rows.filter((r) => VIEWS.pendentes.test(r, today, tomorrow)).length} icon="alert" accent="var(--warn-700)" onClick={() => go('pendentes')} />
-          <StatCard label="Emergenciais em aberto" value={rows.filter((r) => r.priority === 'EMERGENCIAL' && VIEWS.agendadas.test(r, today, tomorrow)).length} icon="alert" accent="var(--crit-700)" onClick={() => go('emergenciais')} />
+          <StatCard label="Urgentes em aberto" value={rows.filter((r) => r.priority === 'URGENTE' && VIEWS.agendadas.test(r, today, tomorrow)).length} icon="alert" accent="var(--crit-700)" onClick={() => go('urgentes')} />
         </div>
       )}
 
