@@ -296,6 +296,16 @@ Guarde o arquivo em local **protegido** (pasta restrita da empresa), pois conté
 
 **Nunca** coloque backups ou planilhas no GitHub (o `.gitignore` já bloqueia `.xlsx` e `.csv`).
 
+## 16a. Colar o print do sistema + mensagem do WhatsApp
+
+Em **Nova coleta → Bloco inteligente**, a técnica pode:
+1. colar a mensagem do WhatsApp no bloco;
+2. colar o **print** do sistema de origem com **Ctrl+V** no mesmo bloco (ou arrastar a imagem, ou tocar em **Adicionar imagem** — no celular abre a câmera/galeria);
+3. conferir o **texto lido da imagem** (pode corrigir) e clicar em **Interpretar**.
+
+A mensagem digitada tem prioridade sobre o print (ex.: o familiar e o telefone que confirmaram vêm da mensagem). Contradições — como "sem material" e "Material na casa: SIM" no mesmo texto — viram pergunta, nunca uma escolha automática.
+A imagem é lida **no próprio navegador** e não é enviada a nenhum serviço. Ela só fica guardada se a técnica marcar **"Anexar a(s) imagem(ns) à solicitação"**.
+
 ## 16. Importar a planilha atual
 
 1. Entre como administrador → menu **Importar planilha**.

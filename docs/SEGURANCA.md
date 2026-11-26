@@ -39,6 +39,7 @@ e a controles ainda não implementados (MFA, CAPTCHA), listados abaixo com plano
 | A05 Security Misconfiguration | bucket privado com MIME/tamanho restritos; *workflow* bloqueia chave `service_role`; `noindex`, `no-referrer` |
 | A06 Vulnerable Components | versões fixadas, `npm audit --audit-level=high` no CI, Dependabot; `uuid` corrigido via `overrides` (GHSA-w5hq-g745-h8pq) |
 | A07 Identification & Auth Failures | confirmação de e-mail, aprovação, senha forte, mensagem de recuperação que não revela contas existentes |
+| Leitura de imagens (OCR) | Motor Tesseract e idioma português servidos pelo próprio site (`public/ocr/`); a imagem é lida no navegador e **não é enviada** a nenhum serviço. A imagem só é guardada se a técnica marcar "Anexar" (bucket privado). CSP libera apenas `'wasm-unsafe-eval'` (necessário ao WebAssembly) e `worker-src 'self'` |
 | A08 Software & Data Integrity | `npm ci` com lockfile; anexos validados por assinatura binária (não só extensão); importação idempotente |
 | A09 Logging & Monitoring | auditoria completa; sem dados de pacientes em logs públicos (CI não imprime dados) |
 | A10 SSRF | não aplicável (sem servidor que busque URLs) |

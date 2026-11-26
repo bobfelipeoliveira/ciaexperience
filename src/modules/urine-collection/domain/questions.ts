@@ -36,6 +36,13 @@ export function buildQuestions(v: UrineRequestInput, today: string, duplicates: 
     q.push({ id: 'name', field: 'patient_name', severity: 'critical', text: 'Não identifiquei o nome do paciente. Qual é o nome completo?', freeText: true });
   }
   for (const c of conflicts) {
+    if (/nomes diferentes/.test(c) ) {
+      q.push({ id: 'conflict-name', field: 'patient_name', severity: 'critical', text: c, freeText: true });
+    }
+    if (/material/i.test(c) && !v.material_available) {
+      q.push({ id: 'conflict-material', field: 'material_available', severity: 'critical', text: c,
+        options: [{ label: 'SIM', value: 'SIM' }, { label: 'NÃO', value: 'NAO' }, { label: 'NÃO CONFIRMADO', value: 'NAO_CONFIRMADO' }] });
+    }
     if (/CVA e CVD/.test(c) && !v.collection_method) {
       q.push({ id: 'conflict-method', field: 'collection_method', severity: 'normal', text: c, options: [{ label: 'CVA', value: 'CVA' }, { label: 'CVD', value: 'CVD' }] });
     }
@@ -53,7 +60,7 @@ export function buildQuestions(v: UrineRequestInput, today: string, duplicates: 
   if (!v.scheduled_date) {
     q.push({ id: 'date', field: 'scheduled_date', severity: 'normal', text: 'Ainda não há data prevista para a coleta. Já foi combinada com a família?' });
   }
-  if (!v.material_available) {
+  if (!v.material_available && !q.some((x) => x.id === 'conflict-material')) {
     q.push({
       id: 'material', field: 'material_available', severity: 'normal',
       text: 'Foi confirmado se existe potinho disponível na residência?',

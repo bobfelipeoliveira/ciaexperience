@@ -11,9 +11,12 @@ import { buildQuestions, type DuplicateHit, type SmartQuestion } from '../domain
 import { validateInput } from '../domain/validation';
 import { label, MATERIAL, METHODS, ORIGINS, PERIODS, PRIORITIES, SHIFTS, STATUSES, type Status } from '../domain/constants';
 import { RequestForm, normalizeInputForSave } from '../components/RequestForm';
-import { createRequest, findDuplicates } from '../services/requests';
+import { createRequest, findDuplicates, uploadAttachment } from '../services/requests';
+import { readImageText, OCR_ACCEPT, OCR_MAX_BYTES } from '../ocr/ocr';
 
 type Mode = 'texto' | 'formulario';
+
+interface PastedImage { id: string; file: File; url: string; status: 'lendo' | 'pronto' | 'erro'; progress: number; step: string; text: string }
 
 function applyExtraction(ex: ExtractionResult, base: UrineRequestInput) {
   const v: UrineRequestInput = { ...base };
@@ -28,6 +31,7 @@ function applyExtraction(ex: ExtractionResult, base: UrineRequestInput) {
   take('collection_method', ex.collection_method);
   take('origin', ex.origin);
   take('priority', ex.priority);
+  take('scheduler_name', ex.scheduler_name);
   take('received_date', ex.received_date);
   take('receipt_shift', ex.receipt_shift);
   take('scheduled_date', ex.scheduled_date);
@@ -59,6 +63,7 @@ export function suggestStatus(v: UrineRequestInput): Status {
 
 const EXTRACT_FIELDS: { key: keyof ExtractionResult; label: string; fmt?: (x: unknown) => string }[] = [
   { key: 'patient_name', label: 'Paciente' },
+  { key: 'scheduler_name', label: 'Responsável (WhatsApp)' },
   { key: 'patient_age', label: 'Idade', fmt: (x) => `${x} anos` },
   { key: 'collection_method', label: 'Forma de coleta', fmt: (x) => label(METHODS, x as string) },
   { key: 'origin', label: 'Origem', fmt: (x) => label(ORIGINS, x as string) },
@@ -116,6 +121,11 @@ export default function NewRequestPage() {
   const [inferred, setInferred] = useState<Partial<Record<keyof UrineRequestInput, string>>>({ received_date: 'Data de hoje (padrão).', receipt_shift: 'Pelo horário atual.' });
   const [status, setStatus] = useState<Status | null>(null);
   const [keepText, setKeepText] = useState(false);
+  const [images, setImages] = useState<PastedImage[]>([]);
+  const [attachImages, setAttachImages] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
+  const reading = images.some((i) => i.status === 'lendo');
   const [dups, setDups] = useState<DuplicateHit[]>([]);
   const [touched, setTouched] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -131,9 +141,37 @@ export default function NewRequestPage() {
     return () => window.clearTimeout(t);
   }, [v.patient_name, v.contact_phone]);
 
+  function addImages(files: File[]) {
+    const ok = files.filter((f) => OCR_ACCEPT.split(',').includes(f.type));
+    if (ok.length < files.length) toast('error', 'Use imagens PNG, JPG ou WEBP (print ou foto).');
+    for (const raw of ok.slice(0, Math.max(0, 4 - images.length))) {
+      if (raw.size > OCR_MAX_BYTES) { toast('error', 'Imagem muito grande (máx. 10 MB).'); continue; }
+      const ext = raw.type === 'image/png' ? 'png' : raw.type === 'image/webp' ? 'webp' : 'jpg';
+      const file = new File([raw], raw.name && raw.name !== 'image.png' ? raw.name : `print-${Date.now()}.${ext}`, { type: raw.type });
+      const id = crypto.randomUUID();
+      const item: PastedImage = { id, file, url: URL.createObjectURL(file), status: 'lendo', progress: 0, step: 'Preparando o leitor…', text: '' };
+      setImages((list) => [...list, item]);
+      readImageText(file, (progress, step) => setImages((list) => list.map((x) => (x.id === id ? { ...x, progress, step } : x))))
+        .then((t) => setImages((list) => list.map((x) => (x.id === id ? { ...x, status: 'pronto', progress: 1, text: t } : x))))
+        .catch(() => setImages((list) => list.map((x) => (x.id === id ? { ...x, status: 'erro' } : x))));
+    }
+  }
+  function removeImage(id: string) {
+    setImages((list) => { const it = list.find((x) => x.id === id); if (it) URL.revokeObjectURL(it.url); return list.filter((x) => x.id !== id); });
+  }
+  function onPaste(e: React.ClipboardEvent) {
+    const files = Array.from(e.clipboardData.items).filter((i) => i.kind === 'file' && i.type.startsWith('image/')).map((i) => i.getAsFile()).filter(Boolean) as File[];
+    if (files.length) {
+      addImages(files);
+      if (!e.clipboardData.getData('text/plain')) e.preventDefault();
+    }
+  }
+  const fullText = [text.trim(), ...images.filter((i) => i.status === 'pronto' && i.text.trim()).map((i) => i.text.trim())].filter(Boolean).join('\n\n');
+
   async function interpret() {
     const ctx = { today, nowHour: hourNowSP() };
-    const r = await localRulesProvider.extract(text, ctx);
+    // a mensagem digitada vem primeiro: ela tem prioridade sobre o texto lido do print
+    const r = await localRulesProvider.extract(fullText, ctx);
     setEx(r);
     const base = { ...emptyInput(), scheduler_name: myName };
     const { v: nv, inferred: inf } = applyExtraction(r, base);
@@ -170,7 +208,14 @@ export default function NewRequestPage() {
       const input = normalizeInputForSave({ ...v, status: effectiveStatus });
       if (keepText && text.trim()) input.notes = [input.notes, `Texto original recebido: ${text.trim()}`].filter(Boolean).join('\n\n').slice(0, 4000);
       const saved = await createRequest(input, mode === 'texto' && ex ? 'TEXTO_LIVRE' : 'FORMULARIO');
-      toast('success', `Solicitação de ${saved.patient_name} salva com sucesso.`);
+      let attached = 0;
+      if (attachImages) {
+        for (const img of images) {
+          try { await uploadAttachment(saved.id, img.file, 'DOCUMENTO'); attached++; }
+          catch (err) { toast('error', `Solicitação salva, mas a imagem não foi anexada: ${friendlyError(err)}`); }
+        }
+      }
+      toast('success', `Solicitação de ${saved.patient_name} salva com sucesso${attached ? ` (${attached} imagem(ns) anexada(s))` : ''}.`);
       nav(`/coletas/${saved.id}`, { replace: true });
     } catch (e) {
       toast('error', friendlyError(e));
@@ -188,15 +233,47 @@ export default function NewRequestPage() {
       ]} />
 
       {mode === 'texto' && (
-        <div className="notepad">
+        <div className="notepad" onDragOver={(e) => { e.preventDefault(); setDragOver(true); }} onDragLeave={() => setDragOver(false)}
+          onDrop={(e) => { e.preventDefault(); setDragOver(false); addImages(Array.from(e.dataTransfer.files)); }}
+          style={dragOver ? { outline: '3px dashed var(--solar-pink-500)', outlineOffset: 4 } : undefined}>
           <div className="notepad-inner">
             <div className="notepad-head"><Icon name="sparkles" /> Bloco de anotação inteligente</div>
-            <textarea value={text} onChange={(e) => setText(e.target.value)} aria-label="Texto da solicitação"
+            <p className="muted small" style={{ marginBottom: 6 }}>Cole a mensagem do WhatsApp aqui. Para o print do sistema, use <b>Ctrl+V</b> neste bloco, arraste a imagem ou toque em <b>Adicionar imagem</b>.</p>
+            <textarea value={text} onChange={(e) => setText(e.target.value)} onPaste={onPaste} aria-label="Texto da solicitação"
               placeholder="Conte aqui o que precisamos saber sobre esta coleta…&#10;&#10;Ex.: Paciente Maria da Silva, 82 anos, coleta por CVA. Recebida pela Intercorrência. Eletiva para amanhã de manhã. Filha Ana confirmou, tel. 21 99999-9999. Tem potinho. Endereço: Rua das Flores, 120, apto 301, Vila da Penha, Rio de Janeiro."
-              onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && text.trim()) void interpret(); }} />
+              onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && fullText && !reading) void interpret(); }} />
+            {images.length > 0 && (
+              <div className="stack-sm" style={{ marginBottom: 12 }}>
+                {images.map((img) => (
+                  <div key={img.id} className="ocr-item">
+                    <img src={img.url} alt="Imagem colada" className="ocr-thumb" />
+                    <div className="stack-sm" style={{ flex: 1, minWidth: 0 }}>
+                      <div className="row-between">
+                        <b className="small">{img.status === 'lendo' ? img.step : img.status === 'erro' ? 'Não consegui ler esta imagem' : 'Texto lido da imagem — confira e corrija se precisar'}</b>
+                        <button type="button" className="btn btn-ghost btn-sm" onClick={() => removeImage(img.id)} aria-label="Remover imagem"><Icon name="trash" size={16} /></button>
+                      </div>
+                      {img.status === 'lendo' && <div className="meter" aria-label="Progresso da leitura"><span style={{ width: `${Math.round(img.progress * 100)}%` }} /></div>}
+                      {img.status === 'erro' && <span className="small muted">Tente um print mais nítido ou digite as informações.</span>}
+                      {img.status === 'pronto' && (
+                        <textarea className="textarea mono" style={{ minHeight: 120, fontSize: '.85rem' }} value={img.text} aria-label="Texto lido da imagem"
+                          onChange={(e) => setImages((list) => list.map((x) => (x.id === img.id ? { ...x, text: e.target.value } : x)))} />
+                      )}
+                    </div>
+                  </div>
+                ))}
+                <label className="row small" style={{ alignItems: 'flex-start' }}>
+                  <input type="checkbox" checked={attachImages} onChange={(e) => setAttachImages(e.target.checked)} style={{ width: 20, height: 20, marginTop: 2 }} />
+                  <span><b>Anexar a(s) imagem(ns) à solicitação</b> <span className="muted">— desmarcado por padrão (o print pode ter dados que não são necessários, como e-mails e outros contatos).</span></span>
+                </label>
+              </div>
+            )}
+            <input ref={fileInput} type="file" hidden multiple accept={OCR_ACCEPT} onChange={(e) => { addImages(Array.from(e.target.files ?? [])); e.target.value = ''; }} />
             <div className="row-between">
-              <span className="muted small"><Icon name="lock" size={14} /> A interpretação acontece no seu navegador. Nada é enviado a serviços externos.</span>
-              <button className="btn btn-accent btn-lg" disabled={!text.trim()} onClick={() => void interpret()}><Icon name="sparkles" /> Interpretar</button>
+              <span className="muted small"><Icon name="lock" size={14} /> Texto e imagens são lidos no seu navegador. Nada é enviado a serviços externos.</span>
+              <div className="row">
+                <button className="btn btn-secondary" type="button" onClick={() => fileInput.current?.click()} disabled={images.length >= 4}><Icon name="paperclip" size={18} /> Adicionar imagem</button>
+                <button className="btn btn-accent btn-lg" disabled={!fullText || reading} onClick={() => void interpret()}><Icon name="sparkles" /> {reading ? 'Lendo imagem…' : 'Interpretar'}</button>
+              </div>
             </div>
           </div>
         </div>

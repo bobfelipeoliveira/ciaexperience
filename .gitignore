@@ -11,3 +11,4 @@ dist/
 *.csv
 backup*/
 tsconfig.tsbuildinfo
+public/ocr/

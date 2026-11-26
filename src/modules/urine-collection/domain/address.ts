@@ -65,7 +65,7 @@ export function parseAddress(input: string | null | undefined): ParsedAddress {
 
   // Quebra em partes por vírgula, ponto-e-vírgula, " - " e quebras de linha
   const parts = s
-    .split(/\s*[,;\n]\s*|\s+[-–]\s+/)
+    .split(/\s*[,;\n]\s*|\s+[-–]\s*|(?<=\w)[-–]\s+/)
     .map((p) => titleKeep(p))
     .filter(Boolean);
 
